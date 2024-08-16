@@ -4,6 +4,11 @@ from config import token # импорт токена
 
 bot = telebot.TeleBot(token) 
 
+@bot.message_handler(content_types=['new_chat_members'])
+def new_member(message):
+    bot.send_message(message.chat.id, 'Новый участник чата!!')
+    bot.approve_chat_join_request(message.chat.id, message.from_user.id)
+
 @bot.message_handler(commands=['start'])
 def start(message):
     bot.reply_to(message, "Привет! Я бот для управления чатом.")
@@ -33,11 +38,18 @@ def ban_user(message):
 
 @bot.message_handler(func=lambda message: True)
 def echo_message(message):
+    chat_id = message.chat.id
+    user_id = message.from_user.id
+    user_status = bot.get_chat_member(chat_id,user_id)
     if message.text == 'пожар':
-        chat_id = message.chat.id
-        user_id = message.from_user.id
-        user_status = bot.get_chat_member(chat_id,user_id)
         if user_status != 'administrator' or user_status != 'creator':
             bot.send_message(chat_id, f"Пользователь @{message.reply_to_message.from_user.username} был забанен.")
             bot.ban_chat_member(chat_id,user_id)
+    if message.text == 'конец':
+        message_id = message.id
+        if user_status != 'administrator' or user_status != 'creator':
+            bot.delete_message(chat_id, message_id, 3)
+            bot.send_message(chat_id, 'Сообщение нарушает правила и было удалено.')
+        
+        
 bot.infinity_polling(none_stop=True)
