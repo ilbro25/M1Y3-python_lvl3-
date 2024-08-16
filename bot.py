@@ -1,3 +1,4 @@
+#для проверки
 import telebot # библиотека telebot
 from config import token # импорт токена
 
