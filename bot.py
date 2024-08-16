@@ -8,6 +8,13 @@ bot = telebot.TeleBot(token)
 def start(message):
     bot.reply_to(message, "Привет! Я бот для управления чатом.")
 
+@bot.message_handler(commands=['cons'])
+def cons(message):
+    if message.reply_to_message:
+        print(message)
+        bot.reply_to(message, 'Сообщение успешно отправлено в консоль VSC.')
+
+
 @bot.message_handler(commands=['ban'])
 def ban_user(message):
     if message.reply_to_message: #проверка на то, что эта команда была вызвана в ответ на сообщение 
@@ -24,4 +31,13 @@ def ban_user(message):
     else:
         bot.reply_to(message, "Эта команда должна быть использована в ответ на сообщение пользователя, которого вы хотите забанить.")
 
+@bot.message_handler(func=lambda message: True)
+def echo_message(message):
+    if message.text == 'пожар':
+        chat_id = message.chat.id
+        user_id = message.from_user.id
+        user_status = bot.get_chat_member(chat_id,user_id)
+        if user_status != 'administrator' or user_status != 'creator':
+            bot.send_message(chat_id, f"Пользователь @{message.reply_to_message.from_user.username} был забанен.")
+            bot.ban_chat_member(chat_id,user_id)
 bot.infinity_polling(none_stop=True)
